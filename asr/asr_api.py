@@ -5,7 +5,7 @@ import torch
 import os
 import tempfile
 
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 16000 # the model is trained on 16kHz sampled audio
 
 
 def get_transcription(audio_array):
@@ -16,7 +16,7 @@ def get_transcription(audio_array):
     predicted_ids = torch.argmax(logits, dim=-1)
     transcription = processor.batch_decode(predicted_ids)
 
-    return transcription
+    return transcription[0]
 
 app = Flask(__name__)
 
@@ -35,7 +35,6 @@ def asr():
         file.save(temp_audio_path)
 
         # Process the audio file
-        # TODO: Add your audio processing code here
         audio_array, _ = librosa.load(temp_audio_path, sr=SAMPLE_RATE)
         duration = len(audio_array) / SAMPLE_RATE
 
@@ -48,11 +47,12 @@ def asr():
         # Return the transcription and duration
         return jsonify({
             'transcription': transcription,
-            'duration': duration
+            'duration': str(duration)
         }), 200
 
 if __name__ == '__main__':
     # load model and processor
     processor = Wav2Vec2Processor.from_pretrained("facebook/wav2vec2-large-960h")
     model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-large-960h")
-    app.run(host='localhost', port=8001)
+    # run app
+    app.run(host='0.0.0.0', port=8001)

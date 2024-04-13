@@ -10,6 +10,12 @@ COPY requirements.txt .
 # Install any dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Fix for libsndfile import error, see https://github.com/PaddlePaddle/PaddleSpeech/issues/440
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y libsndfile1 && \ 
+    apt install -y ffmpeg
+
 # Copy the Python script into the container
 COPY asr_api.py .
 
